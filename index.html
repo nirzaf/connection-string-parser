@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection String Parser</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1d1d1f;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-top: 50px;
+            color: #333;
+        }
+
+        label {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #6e6e73;
+        }
+
+        textarea {
+            width: 80%;
+            max-width: 600px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #d2d2d7;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #0071e3;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+        }
+
+        table {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 30px;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #f2f2f5;
+            font-weight: 600;
+            color: #333;
+            border: 1px solid black;
+        }
+
+        td {
+            border-bottom: 1px solid #e5e5ea;
+        }
+
+        td:last-child {
+            border-bottom: none;
+        }
+
+        #output {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .copy-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background-color: #005bb5;
+        }
+
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+    </style>
+    <script>
+        function parseConnectionString() {
+            const connectionString = document.getElementById("connectionString").value;
+            const properties = connectionString.split(';');
+            const output = document.getElementById("output");
+            output.innerHTML = ''; // Clear previous output
+
+            // Create table and header row
+            const table = document.createElement("table");
+            const headerRow = table.insertRow();
+            headerRow.insertCell().textContent = "Property Name";
+            headerRow.insertCell().textContent = "Value";
+            headerRow.insertCell().textContent = "Action";
+
+            for (let i = 0; i < properties.length; i++) {
+                let property = properties[i].trim();
+                property = property.replace(/"/g, ''); 
+
+                if (property) {
+                    const [key, ...value] = property.split('='); // Split into key-value
+                    const valueString = value.join('='); // Join back value if it had '='
+
+                    const row = table.insertRow();
+                    row.insertCell().textContent = key;
+                    const valueCell = row.insertCell();
+                    valueCell.textContent = valueString;
+
+                    // Add Copy Button
+                    const actionCell = row.insertCell();
+                    const copyButton = document.createElement("button");
+                    copyButton.className = "copy-button";
+                    copyButton.textContent = "Copy";
+                    copyButton.onclick = () => copyToClipboard(valueString, copyButton);
+                    actionCell.appendChild(copyButton);
+                }
+            }
+
+            output.appendChild(table);
+        }
+
+        function copyToClipboard(text, button) {
+            const tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            // Change button text and color to indicate successful copy
+            button.textContent = "Copied";
+            button.classList.add("copied");
+
+            // Reset button text and color after 3 seconds
+            setTimeout(() => {
+                button.textContent = "Copy";
+                button.classList.remove("copied");
+            }, 3000);
+        }
+    </script>
+</head>
+<body>
+    <h1>Connection String Parser</h1>
+    <label for="connectionString">Enter Connection String:</label><br>
+    <textarea id="connectionString" rows="4"></textarea><br>
+    <button onclick="parseConnectionString()">Parse</button>
+    <div id="output"></div>
+</body>
+</html>
